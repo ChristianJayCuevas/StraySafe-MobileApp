@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Stray Safe",
+    "slug": "stray-safe",
+    "version": "1.0.0",
+    "icon": "./assets/StraySafeLogo.png",
+    "scheme": "straysafe",
+    "android": {
+      "package": "com.example.straysafe"
+    },
+    "splash": {
+      "image": "./assets/splashscreen_logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1b061dfb-1413-49f1-944c-ab3e4e9f90ca"
+      }
+    }
+  }
+}
