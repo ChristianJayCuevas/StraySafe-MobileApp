@@ -21,6 +21,7 @@ import DetailsScreen from '../screens/DetailsScreen';
 import ReportPetScreen from '../screens/ReportPetScreen';
 import MapPickerScreen from '../screens/MapPickerScreen';
 import RegisterPetScreen from '../screens/RegisterPet'; // New RegisterPet screen
+import SettingsScreen from '../screens/SettingsScreen'; // New Settings screen
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { NetworkProvider, useNetwork } from '../context/NetworkContext'; // Import the network provider
@@ -73,10 +74,16 @@ function CustomHeader() {
               </TouchableOpacity>
             </View>
           ) : (
-            <Image
-              source={require('../assets/LOGO.png')}
-              style={styles.logoImage}
-            />
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('../assets/StraySafeLogo.png')}
+                style={styles.logoImage}
+              />
+              <View style={styles.logoTextContainer}>
+                <Text style={styles.customText}>Stray</Text>
+                <Text style={[styles.customColor]}>Safe</Text>
+              </View>
+            </View>
           )}
         </View>
 
@@ -95,28 +102,28 @@ function FeedStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Feed"
+        name="FeedMain"
         component={FeedScreen}
         options={{
           header: () => <CustomHeader />,
         }}
       />
       <Stack.Screen
-        name="Details"
+        name="FeedDetails"
         component={DetailsScreen}
         options={{
           header: () => <CustomHeader />,
         }}
       />
       <Stack.Screen
-        name="ReportPet"
+        name="FeedReportPet"
         component={ReportPetScreen}
         options={{
           header: () => <CustomHeader />,
         }}
       />
       <Stack.Screen
-        name="RegisterPet"
+        name="FeedRegisterPet"
         component={RegisterPetScreen}
         options={{
           title: 'Register Your Pet',
@@ -125,7 +132,7 @@ function FeedStackNavigator() {
         }}
       />
       <Stack.Screen
-        name="MapPickerScreen"
+        name="FeedMapPicker"
         component={MapPickerScreen}
         options={{
           title: 'Pick a Location',
@@ -141,7 +148,7 @@ function NotificationsStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Notifications"
+        name="NotificationsMain"
         component={NotificationsScreen}
         options={{
           header: () => <CustomHeader />,
@@ -155,7 +162,7 @@ function MapStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Map"
+        name="MapMain"
         component={MapScreen}
         options={{
           header: () => <CustomHeader />,
@@ -169,8 +176,22 @@ function DashboardStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Dashboard"
+        name="DashboardMain"
         component={DashboardScreen}
+        options={{
+          header: () => <CustomHeader />,
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function SettingsStackNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="SettingsMain"
+        component={SettingsScreen}
         options={{
           header: () => <CustomHeader />,
         }}
@@ -248,16 +269,31 @@ function TabNavigator() {
   );
 }
 
-export default function DrawerNavigator() {
+export default function DrawerNavigator({ onLogout }) {
   return (
     <NetworkProvider>
-      <NetworkAwareApp />
+      <NetworkAwareApp onLogout={onLogout} />
     </NetworkProvider>
   );
 }
 
-function NetworkAwareApp() {
+function NetworkAwareApp({ onLogout }) {
   const { isConnected } = useNetwork();
+  const navigation = useNavigation();
+
+  // Function to handle logout
+  const handleLogout = () => {
+    if (onLogout) {
+      // Just call the onLogout function from App.js
+      // The App.js component will handle changing the auth state
+      // which will automatically switch to the login stack
+      onLogout();
+      
+      // No need to navigate manually
+      // Use DrawerActions to close the drawer
+      navigation.dispatch(DrawerActions.closeDrawer());
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -284,6 +320,9 @@ function NetworkAwareApp() {
           options={{
             drawerLabel: 'Home',
             headerShown: false,
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="home-outline" size={size} color={color} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -292,6 +331,44 @@ function NetworkAwareApp() {
           options={{
             drawerLabel: 'Profile',
             header: () => <CustomHeader />,
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="person-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="SettingsStack"
+          component={SettingsStackNavigator}
+          options={{
+            drawerLabel: 'Settings',
+            headerShown: false,
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="settings-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        {/* Add Logout option at the bottom of the drawer */}
+        <Drawer.Screen
+          name="Logout"
+          component={() => <View />} // Empty component as we'll handle logout via an event
+          listeners={{
+            drawerItemPress: (e) => {
+              // Prevent default action (navigation)
+              e.preventDefault();
+              // Call logout function
+              handleLogout();
+            }
+          }}
+          options={{
+            drawerLabel: () => (
+              <View style={styles.logoutSection}>
+                <View style={styles.separator} />
+                <Text style={styles.logoutText}>Logout</Text>
+              </View>
+            ),
+            drawerIcon: ({ size }) => (
+              <Ionicons name="log-out-outline" size={size} color="#FF4D4F" />
+            ),
           }}
         />
       </Drawer.Navigator>
@@ -343,12 +420,26 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoImage: {
     height: 40,
     resizeMode: 'contain',
+  },
+  logoTextContainer: {
+    flexDirection: 'row',
+    marginLeft: 8,
+  },
+  customText: {
+    color: '#2C2C2C',
+    fontWeight: '700',
+    fontSize: 24,
+    lineHeight: 32,
+  },
+  customColor: {
+    color: '#4f6642',
   },
   searchBarContainer: {
     flexDirection: 'row',
@@ -376,6 +467,20 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     color: theme.colors.textPrimary,
+    fontSize: 16,
+  },
+  logoutSection: {
+    marginTop: 10,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginBottom: 15,
+    marginTop: 5,
+    width: '100%',
+  },
+  logoutText: {
+    color: '#FF4D4F',
     fontSize: 16,
   },
 });

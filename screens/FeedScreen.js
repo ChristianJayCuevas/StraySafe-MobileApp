@@ -48,7 +48,7 @@ export default function FeedScreen() {
 
   const handleOptionSelect = (type) => {
     setIsModalVisible(false);
-    navigation.navigate('ReportPet', { type });
+    navigation.navigate('FeedReportPet', { type });
   };
 
   return (
@@ -165,7 +165,7 @@ export default function FeedScreen() {
             <View style={styles.postContainer}>
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate('Details', {
+                  navigation.navigate('FeedDetails', {
                     image: item.image,
                     location: item.location?.address || 'No location provided',
                     likes: item.likes,
@@ -270,7 +270,7 @@ export default function FeedScreen() {
 
           <TouchableOpacity
             style={styles.registerButton}
-            onPress={() => navigation.navigate('RegisterPet')}
+            onPress={() => navigation.navigate('FeedRegisterPet')}
           >
             <Ionicons
               name="paw"

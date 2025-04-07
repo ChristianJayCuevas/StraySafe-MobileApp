@@ -171,7 +171,7 @@ export default function ProfileScreen() {
   };
   const handleOptionSelect = (type) => {
     setIsModalVisible(false);
-    navigation.navigate('ReportPet', { type });
+    navigation.navigate('FeedReportPet', { type });
   };
 
   const fetchRegisteredPets = async () => {
@@ -188,7 +188,16 @@ export default function ProfileScreen() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        setRegisteredPets(data.data);
+        // Filter pets to only show those owned by the current user
+        const currentUsername = user?.userData?.name;
+        if (currentUsername) {
+          const filteredPets = data.data.filter(pet => pet.owner === currentUsername);
+          setRegisteredPets(filteredPets);
+          console.log(`Filtered ${data.data.length} pets to ${filteredPets.length} owned by ${currentUsername}`);
+        } else {
+          setRegisteredPets([]);
+          console.log('No user logged in, showing no pets');
+        }
       } else {
         console.error('Failed to fetch pets:', data);
       }
@@ -207,7 +216,15 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     fetchRegisteredPets();
-  }, []);
+    
+    // Add a listener to refresh the pets list when the screen is focused
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchRegisteredPets();
+    });
+    
+    // Clean up the listener when the component is unmounted
+    return unsubscribe;
+  }, [navigation]);
 
   const renderPetCard = ({ item }) => (
     <View style={styles.card}>
@@ -263,9 +280,9 @@ export default function ProfileScreen() {
         </View>
 
         {/* Registered Pets Section */}
-        <Text style={styles.sectionTitle}>Registered Pets</Text>
+        <Text style={styles.sectionTitle}>My Registered Pets</Text>
         {loading ? (
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={styles.loadingText}>Loading your pets...</Text>
         ) : registeredPets.length > 0 ? (
           <FlatList
             data={registeredPets}
@@ -277,8 +294,8 @@ export default function ProfileScreen() {
             }
           />
         ) : (
-        <Text style={styles.noPetsText}>No pets registered yet.</Text>
-      )}
+          <Text style={styles.noPetsText}>You don't have any registered pets yet.</Text>
+        )}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.reportButton}
@@ -295,7 +312,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.registerButton}
-            onPress={() => navigation.navigate('RegisterPet')}
+            onPress={() => navigation.navigate('FeedRegisterPet')}
           >
             <Ionicons
               name="paw"

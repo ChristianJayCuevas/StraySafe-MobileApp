@@ -15,6 +15,8 @@ import { theme } from '../theme';
 import axios from 'axios';
 import { usePostContext } from '../context/PostContext';
 import { useUserContext } from '../context/UserContext';
+import { updateCurrentUser } from '../services/NotificationService';
+
 export default function LoginScreen({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -49,9 +51,17 @@ export default function LoginScreen({ onLogin }) {
 
         // Set the user data globally
         setUser(user);
+        
+        // Only update notification service if we have complete user data
+        if (user.userData && user.userData.name) {
+          console.log(`Updating notification service for user: ${user.userData.name}`);
+          await updateCurrentUser(user);
+        } else {
+          console.log('User data incomplete, skipping notification update');
+        }
 
         // Navigate to the main app
-        onLogin();
+        onLogin(user);
       } else {
         alert('Invalid email or password. Please try again.');
       }
@@ -97,8 +107,12 @@ export default function LoginScreen({ onLogin }) {
     >
       <View style={styles.overlay} />
       <View style={styles.container}>
-        <Image source={require('../assets/LOGO.png')} style={styles.logo} />
-
+        <Image source={require('../assets/StraySafeLogo.png')} style={styles.logo} />
+        <View style={styles.logoTextContainer}>
+            <Text style={styles.customText}>Stray</Text>
+            <Text style={[styles.customColor]}>Safe</Text>
+        </View>
+  
         <View style={styles.card}>
           {/* Header */}
           <Text style={styles.header}>Login</Text>
@@ -152,7 +166,7 @@ export default function LoginScreen({ onLogin }) {
           {/* Sign up Link */}
           <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
             <Text style={styles.signUpText}>
-              Don’t have an account?{' '}
+              Don't have an account?{' '}
               <Text style={styles.signUpLink}>Sign up</Text>
             </Text>
           </TouchableOpacity>
@@ -163,6 +177,15 @@ export default function LoginScreen({ onLogin }) {
 }
 
 const styles = StyleSheet.create({
+  customText: {
+    color: '#2C2C2C',
+    fontWeight: '700',
+    fontSize: 24,
+    lineHeight: 32,
+  },
+  customColor: {
+    color: '#4f6642',
+  },
   backgroundImage: {
     flex: 1,
     width: '100%',

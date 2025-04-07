@@ -115,7 +115,7 @@ Total count: ${item.data.count}`);
     } 
     else if (item.type === 'pet_report' && item.post) {
       // For post-related notifications, navigate to Details
-      navigation.navigate('Details', {
+      navigation.navigate('FeedDetails', {
         image: item.post.image,
         location: item.post.location,
         likes: item.post.likes,

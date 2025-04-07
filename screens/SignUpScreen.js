@@ -65,7 +65,7 @@ export default function SignUpScreen({ navigation }) {
       <View style={styles.overlay} />
       <View style={styles.container}>
         <Image
-          source={require('../assets/LOGO.png')}
+          source={require('../assets/StraySafeLogo.png')}
           style={styles.logo}
         />
         <View style={styles.card}>

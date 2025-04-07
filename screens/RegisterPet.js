@@ -28,8 +28,6 @@ export default function RegisterPet() {
   const [modalMessage, setModalMessage] = useState('');
   const { user } = useUserContext();
 
-  const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dmpgutlof/image/upload';
-  const CLOUDINARY_PRESET = 'pet_images_upload';
   const token = 'StraySafeTeam3';
   const handleAddPhoto = async () => {
     Alert.alert('Add Photo', 'Choose an option', [
@@ -57,7 +55,7 @@ export default function RegisterPet() {
 
       if (!pickerResult.canceled) {
         setPetImage(pickerResult.assets[0].uri);
-        analyzeImage(pickerResult.assets[0].base64);
+        analyzeImage(pickerResult.assets[0].uri);
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while selecting an image.');
@@ -83,7 +81,7 @@ export default function RegisterPet() {
 
       if (!pickerResult.canceled) {
         setPetImage(pickerResult.assets[0].uri);
-        analyzeImage(pickerResult.assets[0].base64);
+        analyzeImage(pickerResult.assets[0].uri);
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while taking a photo.');
@@ -91,82 +89,51 @@ export default function RegisterPet() {
     }
   };
 
-  const analyzeImage = async (base64Image) => {
+  const analyzeImage = async (imageUri) => {
     setIsProcessing(true);
     setDetectionResult(null);
+  
     try {
-      const response = await fetch(
-        'https://flaskapp2.greenwater-63e22cc8.southeastasia.azurecontainerapps.io/process_image',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ image: base64Image }),
-        }
-      );
+      const formData = new FormData();
+      formData.append('username', user?.userData?.name); // assuming you use name as folder ID
+      formData.append('file', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: `pet_${Date.now()}.jpg`,
+      });
+  
+      const response = await fetch('https://straysafe.me/api2/upload-pet-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
   
       const data = await response.json();
-      if (data?.labeled_boxes?.length > 0) {
-        let { label, confidence } = data.labeled_boxes[0];
+      console.log('Detection API response:', data);
   
-        // Flip the label
-        label = label === 'dog' ? 'cat' : label === 'cat' ? 'dog' : label;
-  
-        if (confidence < 0.8) {
-          Alert.alert(
-            'Low Confidence',
-            'We only allow images of cats and dogs for feature matching. Please upload a clear image.'
-          );
-          setPetImage(null);
-          setDetectionResult(null);
-        } else {
-          setDetectionResult({ label, confidence });
-          setPetType(label); // Auto-fill Pet Type
-        }
+      if (response.ok && data.status === 'success') {
+        const { label, confidence, file_url } = data;
+        setDetectionResult({ label, confidence, file_url }); // Store file_url in detectionResult
+        setPetType(label); // Auto-fill Pet Type
+      } else if (data.status === 'rejected') {
+        Alert.alert('Low Confidence', data.message || 'Please upload a clearer image.');
+        setPetImage(null);
+        setDetectionResult(null);
       } else {
-        Alert.alert('Detection Failed', 'Could not identify the animal in the photo.');
+        Alert.alert('Error', data.message || 'Failed to classify the image.');
         setPetImage(null);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to analyze the image. Please try again.');
-      console.error('Image Analysis Error:', error);
+      Alert.alert('Error', 'Failed to connect to classification service.');
+      console.error('Image Upload Error:', error);
+      setPetImage(null);
     } finally {
       setIsProcessing(false);
     }
   };
   
-
-  const uploadImageToCloudinary = async (imageUri) => {
-    const formData = new FormData();
-    formData.append('file', {
-      uri: imageUri,
-      type: 'image/jpeg', // Adjust the type if needed based on your image format
-      name: 'pet_image.jpg', // You can customize the file name
-    });
-    formData.append('upload_preset', CLOUDINARY_PRESET);
-  
-    try {
-      const response = await fetch(CLOUDINARY_UPLOAD_URL, {
-        method: 'POST',
-        body: formData,
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        return data.secure_url; // Return the uploaded image URL
-      } else {
-        throw new Error(data.error?.message || 'Image upload failed.');
-      }
-    } catch (error) {
-      console.error('Cloudinary Upload Error:', error);
-      throw new Error('Image upload failed.');
-    }
-  };
-  
-  // Modified the handleRegisterPet function to use the raw image file instead of base64
-
   const handleRegisterPet = async () => {
     if (isProcessing) {
       setModalMessage('Please wait for the verification of the photo.');
@@ -174,8 +141,8 @@ export default function RegisterPet() {
       return;
     }
   
-    if (!petName || !petType || !petBreed || !ownerContact || !petImage) {
-      setModalMessage('Please fill up all the input boxes.');
+    if (!petName || !petType || !petBreed || !ownerContact || !petImage || !detectionResult) {
+      setModalMessage('Please fill up all the input boxes and add a verified pet photo.');
       setModalVisible(true);
       return;
     }
@@ -184,8 +151,8 @@ export default function RegisterPet() {
       setModalMessage('Registering your pet...');
       setModalVisible(true);
   
-      // Upload raw image to Cloudinary
-      const imageUrl = await uploadImageToCloudinary(petImage);
+      // Use the file_url from the detection API instead of uploading to Cloudinary
+      const imageUrl = `https://straysafe.me${detectionResult.file_url}`;
   
       // Prepare JSON payload
       const payload = {

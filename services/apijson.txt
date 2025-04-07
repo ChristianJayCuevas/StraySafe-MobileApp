@@ -1,0 +1,66 @@
+{
+  "count": 4,
+  "detected_animals": [
+    {
+      "animal_id": "dog2",
+      "animal_type": "dog",
+      "classification": "stray",
+      "id": "static-demo2_dogdog2_1743952101",
+      "image_path": "/home/straysafe/venv/venv/debug/static-demo2/static-demo2_max_dog2.jpg",
+      "image_url": "/api2/detected-img/static-demo2/static-demo2_max_dog2.jpg",
+      "match": "frame_264828.jpg",
+      "match_method": "embedding",
+      "match_score": 0.5978301167488098,
+      "notification_case": "stray_registered",
+      "notification_type": "owner_notification",
+      "owner_id": "Ronnie",
+      "stream_id": "static-demo2",
+      "timestamp": "2025-04-06T15:08:21.062445"
+    },
+    {
+      "animal_id": "cat1",
+      "animal_type": "cat",
+      "classification": "not_stray",
+      "id": "static-demo3_catcat1_1743952100",
+      "image_path": "/home/straysafe/venv/venv/debug/static-demo3/static-demo3_max_cat1.jpg",
+      "image_url": "/api2/detected-img/static-demo3/static-demo3_max_cat1.jpg",
+      "match": "frame_264828.jpg",
+      "match_method": "embedding",
+      "match_score": 0.638213038444519,
+      "notification_case": "not_stray_registered",
+      "notification_type": "owner_notification",
+      "owner_id": "Ronnie",
+      "stream_id": "static-demo3",
+      "timestamp": "2025-04-06T15:08:20.826454"
+    },
+    {
+      "animal_id": "dog1",
+      "animal_type": "dog",
+      "classification": "not_stray",
+      "id": "static-demo1_dogdog1_1743952100",
+      "image_path": "/home/straysafe/venv/venv/debug/static-demo1/static-demo1_max_dog1.jpg",
+      "image_url": "/api2/detected-img/static-demo1/static-demo1_max_dog1.jpg",
+      "match": "frame_264828.jpg",
+      "match_method": "embedding",
+      "match_score": 0.7880736589431763,
+      "notification_case": "not_stray_registered",
+      "notification_type": "owner_notification",
+      "owner_id": "Ronnie",
+      "stream_id": "static-demo1",
+      "timestamp": "2025-04-06T15:08:20.586800"
+    },
+    {
+      "animal_id": "cat2",
+      "animal_type": "cat",
+      "classification": "stray",
+      "id": "cam-5_catcat2_1743952100",
+      "image_path": "/home/straysafe/venv/venv/debug/cam-5/cam-5_max_cat2.jpg",
+      "image_url": "/api2/detected-img/cam-5/cam-5_max_cat2.jpg",
+      "notification_case": "stray_unregistered",
+      "notification_type": "pound_notification",
+      "owner_id": null,
+      "stream_id": "cam-5",
+      "timestamp": "2025-04-06T15:08:20.345240"
+    }
+  ]
+}

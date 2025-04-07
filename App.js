@@ -21,12 +21,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import axios from 'axios';
-import TestNotificationButton from './components/TestNotificationButton';
 import { 
   registerBackgroundNotificationTask, 
   checkBackgroundNotificationStatus, 
   startNotificationPolling,
-  initializeNotificationService 
+  initializeNotificationService,
+  updateCurrentUser,
+  performImmediateCheck
 } from './services/NotificationService';
 
 const Stack = createStackNavigator();
@@ -41,177 +42,110 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check and initialize background notification tasks when app starts
-    const initializeNotifications = async () => {
+    const initializeApp = async () => {
       try {
-        // Request notification permissions
-        const { status } = await Notifications.requestPermissionsAsync();
-        if (status !== 'granted') {
-          console.log('Notification permission not granted');
-          return;
-        }
-        
-        // Initialize notification service with counter tracking
+        // Initialize notification service
         await initializeNotificationService();
         
-        // Start polling for notifications every 30 seconds
+        // Register background task
+        await registerBackgroundNotificationTask();
+        
+        // Start notification polling
         startNotificationPolling();
         
-        // Check if background task is registered
-        const taskStatus = await checkBackgroundNotificationStatus();
-        if (!taskStatus.isRegistered) {
-          await registerBackgroundNotificationTask();
-          console.log('Background notification task registered on app start');
-        } else {
-          console.log('Background notification task already registered');
+        // Perform an immediate check for notifications
+        const checkResult = await performImmediateCheck();
+        if (checkResult.success && checkResult.notified) {
+          console.log('Immediate check found relevant notifications');
         }
+        
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error initializing notifications:', error);
+        console.error('Error initializing app:', error);
+        setIsLoading(false);
       }
     };
 
-    initializeNotifications();
+    initializeApp();
   }, []);
 
-  const handleLogin = (userData) => {
-    setLoading(true);
-    setIsLoggedIn(true);
-    setLoading(false);
+  const handleLogin = async (userData) => {
+    try {
+      // Update the notification service with the new user
+      const updateResult = await updateCurrentUser(userData);
+      
+      if (updateResult) {
+        setCurrentUser(userData);
+        setIsAuthenticated(true);
+        
+        // Perform an immediate check after login
+        const checkResult = await performImmediateCheck();
+        if (checkResult.success && checkResult.notified) {
+          console.log('Post-login check found relevant notifications');
+        }
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      Alert.alert('Error', 'Failed to complete login process');
+    }
   };
 
-  if (loading) {
+  const handleLogout = async () => {
+    try {
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+      await updateCurrentUser(null);
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#FF6F61" />
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <NetworkProvider>
-      <MapProvider>
-        <UserProvider>
-          <PostProvider>
-            <NetworkAwareApp isLoggedIn={isLoggedIn} handleLogin={handleLogin} />
-          </PostProvider>
-        </UserProvider>
-      </MapProvider>
-    </NetworkProvider>
-  );
-}
-
-function NetworkAwareApp({ isLoggedIn, handleLogin }) {
-  const { isConnected } = useNetwork();
-  const notificationListener = useRef();
-  const responseListener = useRef();
-  const lastNotificationResponse = Notifications.useLastNotificationResponse();
-  const navigation = useRef(null);
-
-  useEffect(() => {
-    // Listen for notifications when the app is foregrounded
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-      console.log('Notification received in foreground:', notification);
-    });
-
-    // Listen for user interactions with notifications
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log('Notification response:', response);
-      // Handle the notification interaction here
-      const data = response.notification.request.content.data;
-      handleNotificationInteraction(data);
-    });
-
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
-
-  // Handle notification interactions when app is opened from a notification
-  useEffect(() => {
-    if (lastNotificationResponse) {
-      const data = lastNotificationResponse.notification.request.content.data;
-      handleNotificationInteraction(data);
-    }
-  }, [lastNotificationResponse]);
-
-  const handleNotificationInteraction = (data) => {
-    // Handle different types of notifications based on the data
-    console.log('Handling notification interaction with data:', data);
-    
-    if (data.type === 'pet_detection') {
-      const { cameraId, animalType, count, newCount } = data;
-      const displayCameraId = data.location || cameraId;
-      
-      Alert.alert(
-        `${animalType.charAt(0).toUpperCase() + animalType.slice(1)} Detection`, 
-        `${newCount} new ${animalType}(s) detected on camera ${displayCameraId}.\nTotal count: ${count}`,
-        [{ text: 'OK' }]
-      );
-      
-      // You can also navigate to a specific screen here
-      // if (navigation.current) {
-      //   navigation.current.navigate('NotificationsScreen');
-      // }
-    }
-    else if (data.type === 'pet_report') {
-      // Handle legacy notification type
-      Alert.alert('Pet Report', `A pet was reported at ${data.location || 'unknown location'}`, [
-        { text: 'OK' }
-      ]);
-    }
-  };
-  
-  const sendTokenToServer = (token) => {
-    // Mock implementation instead of real API call
-    console.log('Push token would be sent to server:', token);
-    setTimeout(() => {
-      console.log('Mock successful token registration');
-      Alert.alert('Success', 'Push token registered locally for testing.');
-    }, 1000);
-  };
-
-  return (
-    <View style={{ flex: 1 }}>
-      {/* Only show network banner when not connected */}
-      {!isConnected && (
-        <View style={styles.networkBanner}>
-          <Ionicons name="alert-circle-outline" size={20} color="#FFF" />
-          <Text style={styles.networkBannerText}>No Internet Connection</Text>
-        </View>
-      )}
-
-      <NavigationContainer ref={navigation}>
-        {isLoggedIn ? (
-          <>
-            <TabNavigator />
-            <View style={styles.testButtonContainer}>
-              <TestNotificationButton />
-            </View>
-          </>
-        ) : (
-          <Stack.Navigator initialRouteName="WelcomeScreen">
-            <Stack.Screen
-              name="WelcomeScreen"
-              component={WelcomeScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name="LoginScreen" options={{ headerShown: false }}>
-              {(props) => <LoginScreen {...props} onLogin={handleLogin} />}
-            </Stack.Screen>
-            <Stack.Screen
-              name="SignUpScreen"
-              component={SignUpScreen}
-              options={{ headerShown: false }}
-            />
-          </Stack.Navigator>
-        )}
-      </NavigationContainer>
-    </View>
+    <UserProvider>
+      <PostProvider>
+        <MapProvider>
+          <NavigationContainer>
+            <Stack.Navigator
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              {!isAuthenticated ? (
+                <>
+                  <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                  <Stack.Screen name="Login">
+                    {(props) => (
+                      <LoginScreen {...props} onLogin={handleLogin} />
+                    )}
+                  </Stack.Screen>
+                  <Stack.Screen name="SignUp" component={SignUpScreen} />
+                </>
+              ) : (
+                <Stack.Screen name="MainApp">
+                  {(props) => (
+                    <TabNavigator {...props} onLogout={handleLogout} />
+                  )}
+                </Stack.Screen>
+              )}
+            </Stack.Navigator>
+          </NavigationContainer>
+        </MapProvider>
+      </PostProvider>
+    </UserProvider>
   );
 }
 
@@ -220,29 +154,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
   },
-  networkBanner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 999,
-    backgroundColor: 'red',
-    padding: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  networkBannerText: {
-    color: '#FFF',
-    marginLeft: 10,
+  loadingText: {
+    marginTop: 10,
     fontSize: 16,
-  },
-  testButtonContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 0,
-    right: 0,
-    zIndex: 999,
+    color: '#FF6F61',
   },
 });

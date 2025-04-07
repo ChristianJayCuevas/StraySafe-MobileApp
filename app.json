@@ -6,12 +6,39 @@
     "icon": "./assets/StraySafeLogo.png",
     "scheme": "straysafe",
     "android": {
-      "package": "com.example.straysafe"
+      "package": "com.example.straysafe",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBCKJ3TRt7zOYtHjac7CVTcOS5xie0FZ4E"
+        }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "splash": {
       "image": "./assets/splashscreen_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Stray Safe to use your location."
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.straysafe",
+      "config": {
+        "googleMapsApiKey": "AIzaSyBCKJ3TRt7zOYtHjac7CVTcOS5xie0FZ4E"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Allow Stray Safe to use your location."
+      }
     },
     "extra": {
       "eas": {

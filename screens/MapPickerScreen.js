@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../theme';
 
 export default function MapPickerScreen({ navigation, route }) {
@@ -29,6 +29,7 @@ export default function MapPickerScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
           latitude: 14.6297,
@@ -37,6 +38,9 @@ export default function MapPickerScreen({ navigation, route }) {
           longitudeDelta: 0.01, // Zoom level
         }}
         onPress={handleMapPress} // Allow users to set a marker by tapping
+        loadingEnabled={true}
+        loadingIndicatorColor={theme.colors.primary}
+        loadingBackgroundColor="#f9f9f9"
       >
         <Marker
           coordinate={markerPosition}
@@ -54,9 +58,12 @@ export default function MapPickerScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   map: {
     flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
   confirmButton: {
     backgroundColor: theme.colors.primary,
@@ -64,6 +71,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     margin: 10,
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    right: 10,
   },
   confirmButtonText: {
     color: '#FFF',

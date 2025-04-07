@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Dimensions, StatusBar, SafeAreaView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const { width, height } = Dimensions.get('window'); // Get full screen dimensions
+// Get device dimensions including the status bar
+const { width, height } = Dimensions.get('window');
+const STATUSBAR_HEIGHT = StatusBar.currentHeight || 0;
+const screenHeight = Platform.OS === 'ios' ? height : height + STATUSBAR_HEIGHT;
 
 const images = [
   require('../assets/welcome1.png'), // Replace with your actual image paths
@@ -21,6 +24,26 @@ export default function WelcomeScreen() {
   const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width, height: screenHeight });
+
+  // Add event listener for dimension changes (for device rotation)
+  useEffect(() => {
+    const updateDimensions = () => {
+      const { width, height } = Dimensions.get('window');
+      setDimensions({ 
+        width, 
+        height: Platform.OS === 'ios' ? height : height + STATUSBAR_HEIGHT 
+      });
+    };
+    
+    // Set up listener for dimension changes
+    const dimensionsListener = Dimensions.addEventListener('change', updateDimensions);
+    
+    // Clean up
+    return () => {
+      dimensionsListener.remove();
+    };
+  }, []);
 
   // Auto-slide effect
   useEffect(() => {
@@ -46,11 +69,16 @@ export default function WelcomeScreen() {
   }, [])
 
   const renderItem = ({ item }) => (
-    <Image source={item} style={styles.image} />
+    <Image 
+      source={item} 
+      style={[styles.image, { width: dimensions.width, height: dimensions.height }]} 
+    />
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width: dimensions.width, height: dimensions.height }]}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      
       <FlatList
         data={images}
         renderItem={renderItem}
@@ -59,15 +87,18 @@ export default function WelcomeScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         ref={flatListRef}
-        style={styles.imageSlider}
+        style={[styles.imageSlider, { width: dimensions.width, height: dimensions.height }]}
+        snapToInterval={dimensions.width}
+        decelerationRate="fast"
+        bounces={false}
       />
 
-      {/* Ombre gradient overlay for the bottom 1/4 of the screen */}
+      {/* Ombre gradient overlay for the bottom portion of the screen */}
       <LinearGradient
         colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 0.6 }}
-        style={styles.gradientOverlay}
+        style={[styles.gradientOverlay, { height: dimensions.height * 0.6 }]}
       />
 
       {/* Overlay containing text and buttons */}
@@ -77,14 +108,14 @@ export default function WelcomeScreen() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.signUpButton]}
-            onPress={() => navigation.navigate('SignUpScreen')}
+            onPress={() => navigation.navigate('SignUp')}
           >
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.signInButton]}
-            onPress={() => navigation.navigate('LoginScreen')}
+            onPress={() => navigation.navigate('Login')}
           >
             <Text style={[styles.buttonText, styles.signInButtonText]}>Sign In</Text>
           </TouchableOpacity>
@@ -97,28 +128,26 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000', // Add background color to avoid flashing
   },
   imageSlider: {
-    width: width,
-    height: height,
+    flex: 1,
   },
   image: {
-    width: width,
-    height: height,
     resizeMode: 'cover',
   },
   gradientOverlay: {
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    height: height * 0.6, // Covers the bottom 1/4 of the screen
   },
   overlayContent: {
     position: 'absolute',
-    bottom: 50,
+    bottom: Platform.OS === 'ios' ? 50 : 30,
     width: '100%',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 0 : 20,
   },
   title: {
     color: '#fff',
@@ -129,7 +158,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '80%',
   },
   button: {
@@ -138,6 +167,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1,
     alignItems: 'center',
+    minWidth: 120,
   },
   signUpButton: {
     backgroundColor: '#fff',
