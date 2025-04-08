@@ -107,10 +107,8 @@ export default function LoginScreen({ onLogin }) {
     >
       <View style={styles.overlay} />
       <View style={styles.container}>
-        <Image source={require('../assets/StraySafeLogo.png')} style={styles.logo} />
+        <Image source={require('../assets/LOGO.png')} style={styles.logo} />
         <View style={styles.logoTextContainer}>
-            <Text style={styles.customText}>Stray</Text>
-            <Text style={[styles.customColor]}>Safe</Text>
         </View>
   
         <View style={styles.card}>
@@ -165,11 +163,11 @@ export default function LoginScreen({ onLogin }) {
 
           {/* Sign up Link */}
           <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
-            <Text style={styles.signUpText}>
-              Don't have an account?{' '}
-              <Text style={styles.signUpLink}>Sign up</Text>
-            </Text>
-          </TouchableOpacity>
+  <Text style={styles.signUpText}>
+    Don't have an account?{' '}
+    <Text style={styles.signUpLink}>Sign up</Text>
+  </Text>
+</TouchableOpacity>
         </View>
       </View>
     </ImageBackground>
@@ -177,15 +175,7 @@ export default function LoginScreen({ onLogin }) {
 }
 
 const styles = StyleSheet.create({
-  customText: {
-    color: '#2C2C2C',
-    fontWeight: '700',
-    fontSize: 24,
-    lineHeight: 32,
-  },
-  customColor: {
-    color: '#4f6642',
-  },
+
   backgroundImage: {
     flex: 1,
     width: '100%',
@@ -207,7 +197,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 500,
-    height: 70,
+    height: 100,
     resizeMode: 'contain',
     marginBottom: 20,
   },
@@ -239,7 +229,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     borderRadius: 10,
-    backgroundColor: '#F2D8B1',
+    backgroundColor: '#d4d8be',
     paddingHorizontal: 15,
     fontSize: 16,
     color: theme.colors.textPrimary,

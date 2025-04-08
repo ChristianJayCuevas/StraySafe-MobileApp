@@ -13,10 +13,6 @@ import { Ionicons } from '@expo/vector-icons';
 export default function SettingsScreen() {
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
-      </View>
-
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Notifications</Text>
         <Text style={styles.sectionDescription}>
@@ -44,16 +40,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    padding: 20,
-    paddingTop: 30,
-    backgroundColor: theme.colors.primary,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
   },
   section: {
     margin: 16,
@@ -87,4 +73,4 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     color: theme.colors.textPrimary,
   }
-}); 
+});

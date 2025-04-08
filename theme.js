@@ -4,8 +4,8 @@ const { width, height } = Dimensions.get('window');
 
 export const theme = {
   colors: {
-    background: '#FAF4EB', // Light beige/cream background
-    primary: '#3CB8AD', // Teal for buttons and interactive elements
+    background: '#f4f5dd', // Light beige/cream background
+    primary: '#506643', // Teal for buttons and interactive elements
     textPrimary: '#2C2C2C', // Dark gray for main text
     textSecondary: '#5A5A5A', // Medium gray for secondary text
     highlight: '#F2D8B1', // Soft peach highlight for inputs and secondary elements
@@ -20,7 +20,7 @@ export const theme = {
     titleFont: {
       fontSize: 28,
       fontWeight: 'bold',
-      color: '#2C2C2C', // Dark gray
+      color: '#000', // Dark gray
     },
     buttonText: {
       fontSize: 18,

@@ -45,7 +45,7 @@ export default function SignUpScreen({ navigation }) {
   
       if (response.data.status === "success") {
         alert(response.data.message);
-        navigation.navigate("LoginScreen");
+        navigation.navigate("Login");
       } else {
         alert("Error: " + JSON.stringify(response.data.message));
       }
@@ -57,6 +57,7 @@ export default function SignUpScreen({ navigation }) {
   
 
   return (
+    
     <ImageBackground
       source={require('../assets/wallpaper3.jpg')}
       style={styles.backgroundImage}
@@ -65,7 +66,7 @@ export default function SignUpScreen({ navigation }) {
       <View style={styles.overlay} />
       <View style={styles.container}>
         <Image
-          source={require('../assets/StraySafeLogo.png')}
+          source={require('../assets/LOGO.png')}
           style={styles.logo}
         />
         <View style={styles.card}>
@@ -148,9 +149,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 500,
-    height: 70,
+    height: 100,
     resizeMode: 'contain',
-    marginBottom: 20,
+    marginBottom: 1,
   },
   card: {
     width: '85%',
@@ -180,15 +181,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     borderRadius: 10,
-    backgroundColor: '#F2D8B1',
+    backgroundColor: '#d4d8be',
     paddingHorizontal: 15,
     fontSize: 16,
-    color: '#333',
+    color: '#0000',
     marginBottom: 20,
   },
   signUpButton: {
     width: '100%',
-    backgroundColor: '#5EBD3E',
+    backgroundColor: '#506643',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -206,6 +207,6 @@ const styles = StyleSheet.create({
   loginRedirectLink: {
     fontWeight: 'bold',
     textDecorationLine: 'underline',
-    color: '#5EBD3E',
+    color: '#506643',
   },
 });

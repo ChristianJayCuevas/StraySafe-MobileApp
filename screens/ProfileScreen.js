@@ -248,134 +248,57 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[theme.colors.background, theme.colors.lightBlueAccent]}
-        style={styles.gradientBackground}
-      >
-        {/* User Info Section */}
-        <View style={styles.profileContainer}>
-        <TouchableOpacity onPress={handleProfilePictureChange}>
-                  {user?.profile_image_link ? (
-              <Image
-              source={{ uri: profilePicture || user?.profile_image_link }}
-              style={styles.profileImage}
-            />
-            ) : (
-              <Ionicons
-                name="person-circle-outline"
-                size={100}
-                color={theme.colors.primary}
-              />
-            )}
-          </TouchableOpacity>
-          {isProcessing && <ActivityIndicator size="small" color={theme.colors.primary} />}
-            <Text style={styles.userName}>
-            {user?.userData?.name || 'Your Name'}
-          </Text>
-          <Text style={styles.userEmail}>
-            {user?.userData?.email || 'your.email@gmail.com'}
-          </Text>
-          <Text style={styles.userContact}>
-            {user?.userData?.contact_number || 'No contact number provided'}
-          </Text>
-        </View>
+  colors={[theme.colors.background, theme.colors.lightBlueAccent]}
+  style={styles.gradientBackground}
+>
+  {/* User Info Section */}
+  <View style={styles.profileContainer}>
+    <TouchableOpacity onPress={handleProfilePictureChange}>
+      {user?.profile_image_link ? (
+        <Image
+          source={{ uri: profilePicture || user?.profile_image_link }}
+          style={styles.profileImage}
+        />
+      ) : (
+        <Ionicons
+          name="person-circle-outline"
+          size={100}
+          color={theme.colors.primary}
+        />
+      )}
+    </TouchableOpacity>
+    {isProcessing && <ActivityIndicator size="small" color={theme.colors.primary} />}
+    <Text style={styles.userName}>
+      {user?.userData?.name || 'Your Name'}
+    </Text>
+    <Text style={styles.userEmail}>
+      {user?.userData?.email || 'your.email@gmail.com'}
+    </Text>
+    <Text style={styles.userContact}>
+      {user?.userData?.contact_number || 'No contact number provided'}
+    </Text>
+  </View>
 
-        {/* Registered Pets Section */}
-        <Text style={styles.sectionTitle}>My Registered Pets</Text>
-        {loading ? (
-          <Text style={styles.loadingText}>Loading your pets...</Text>
-        ) : registeredPets.length > 0 ? (
-          <FlatList
-            data={registeredPets}
-            renderItem={renderPetCard}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.petList}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-          />
-        ) : (
-          <Text style={styles.noPetsText}>You don't have any registered pets yet.</Text>
-        )}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.reportButton}
-            onPress={handleReportPetPress}
-          >
-            <Ionicons
-              name="location"
-              size={20}
-              color="#FFF"
-              style={styles.buttonIcon}
-            />
-            <Text style={styles.reportButtonText}>Pin on Map</Text>
-          </TouchableOpacity>
+  {/* Registered Pets Section */}
+  <Text style={styles.sectionTitle}>My Registered Pets</Text>
+  {loading ? (
+    <Text style={styles.loadingText}>Loading your pets...</Text>
+  ) : registeredPets.length > 0 ? (
+    <FlatList
+      data={registeredPets}
+      renderItem={renderPetCard}
+      keyExtractor={(item) => item.id.toString()}
+      contentContainerStyle={styles.petList}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    />
+  ) : (
+    <Text style={styles.noPetsText}>You don't have any registered pets yet.</Text>
+  )}
 
-          <TouchableOpacity
-            style={styles.registerButton}
-            onPress={() => navigation.navigate('FeedRegisterPet')}
-          >
-            <Ionicons
-              name="paw"
-              size={20}
-              color="#FFF"
-              style={styles.buttonIcon}
-            />
-            <Text style={styles.registerButtonText}>Register Pet</Text>
-          </TouchableOpacity>
-        </View>
-        <Modal
-        transparent={true}
-        animationType="fade"
-        visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Select Post Type</Text>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => handleOptionSelect('missing')}
-            >
-              <Ionicons
-                name="alert-circle-outline"
-                size={24}
-                color={theme.colors.primary}
-              />
-              <Text style={styles.modalButtonText}>Missing</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => handleOptionSelect('found')}
-            >
-              <Ionicons
-                name="paw-outline"
-                size={24}
-                color={theme.colors.primary}
-              />
-              <Text style={styles.modalButtonText}>Found</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => handleOptionSelect('forAdoption')}
-            >
-              <Ionicons
-                name="heart-outline"
-                size={24}
-                color={theme.colors.primary}
-              />
-              <Text style={styles.modalButtonText}>For Adoption</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setIsModalVisible(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      </LinearGradient>
-    </View>
+</LinearGradient>  
+</View>  
   );
 }
 

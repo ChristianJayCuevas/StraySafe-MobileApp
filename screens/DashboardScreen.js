@@ -76,7 +76,6 @@ export default function DashboardScreen() {
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      <Text style={styles.pageTitle}>Dashboard</Text>
       <View style={styles.dashboardCard}>
         <View style={styles.statCard}>
           <Text style={styles.statTitle}>Total Stray Sightings</Text>
