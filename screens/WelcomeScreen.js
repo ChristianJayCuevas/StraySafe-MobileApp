@@ -1,32 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Dimensions, StatusBar, SafeAreaView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, StatusBar, SafeAreaView, Platform, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// Get device dimensions including the status bar
 const { width, height } = Dimensions.get('window');
 const STATUSBAR_HEIGHT = StatusBar.currentHeight || 0;
 const screenHeight = Platform.OS === 'ios' ? height : height + STATUSBAR_HEIGHT;
 
 const images = [
-  require('../assets/welcome1.png'), // Replace with your actual image paths
+  require('../assets/welcome1.png'),
   require('../assets/welcome2.png'),
   require('../assets/welcome3.png'),
   require('../assets/welcome4.jpg'),
   require('../assets/welcome5.jpg'),
   require('../assets/welcome6.jpg'),
   require('../assets/welcome7.jpg'),
-  require('../assets/welcome8.jpg'),
-  require('../assets/welcome10.png')
+  require('../assets/kuting1.jpg'),
+  require('../assets/hoshing1.jpg')
 ];
 
 export default function WelcomeScreen() {
   const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef(null);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
   const [dimensions, setDimensions] = useState({ width, height: screenHeight });
 
-  // Add event listener for dimension changes (for device rotation)
   useEffect(() => {
     const updateDimensions = () => {
       const { width, height } = Dimensions.get('window');
@@ -36,64 +34,50 @@ export default function WelcomeScreen() {
       });
     };
     
-    // Set up listener for dimension changes
     const dimensionsListener = Dimensions.addEventListener('change', updateDimensions);
-    
-    // Clean up
-    return () => {
-      dimensionsListener.remove();
-    };
+    return () => dimensionsListener.remove();
   }, []);
 
-  // Auto-slide effect
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 3000); // Change slide every 3 seconds
+      // Fade out current image
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        // Change image index
+        setCurrentIndex((prevIndex) =>
+          prevIndex === images.length - 1 ? 0 : prevIndex + 1
+        );
+        // Fade in new image
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
-
-  // Update FlatList position when index changes
-  useEffect(() => {
-    if (flatListRef.current) {
-      flatListRef.current.scrollToIndex({ index: currentIndex, animated: true });
-    }
   }, [currentIndex]);
-
-  // Check if user is logged in
-  useEffect(() => {
-    
-  }, [])
-
-  const renderItem = ({ item }) => (
-    <Image 
-      source={item} 
-      style={[styles.image, { width: dimensions.width, height: dimensions.height }]} 
-    />
-  );
 
   return (
     <View style={[styles.container, { width: dimensions.width, height: dimensions.height }]}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       
-      <FlatList
-        data={images}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        ref={flatListRef}
-        style={[styles.imageSlider, { width: dimensions.width, height: dimensions.height }]}
-        snapToInterval={dimensions.width}
-        decelerationRate="fast"
-        bounces={false}
+      <Animated.Image
+        source={images[currentIndex] || require('../assets/welcome1.png')}
+        style={[
+          styles.image, 
+          { 
+            width: dimensions.width, 
+            height: dimensions.height,
+            opacity: fadeAnim
+          }
+        ]}
       />
 
-      {/* Ombre gradient overlay for the bottom portion of the screen */}
       <LinearGradient
         colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
         start={{ x: 0.5, y: 0 }}
@@ -101,8 +85,19 @@ export default function WelcomeScreen() {
         style={[styles.gradientOverlay, { height: dimensions.height * 0.6 }]}
       />
 
-      {/* Overlay containing text and buttons */}
       <View style={styles.overlayContent}>
+        <View style={styles.indicatorsContainer}>
+          {images.map((_, index) => (
+            <View 
+              key={index}
+              style={[
+                styles.indicator,
+                index === currentIndex && styles.activeIndicator
+              ]}
+            />
+          ))}
+        </View>
+
         <Text style={styles.title}>Together, we can make every street a kinder place for stray animals.</Text>
 
         <View style={styles.buttonContainer}>
@@ -128,12 +123,29 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // Add background color to avoid flashing
+    backgroundColor: '#000',
   },
-  imageSlider: {
-    flex: 1,
+  indicatorsContainer: {
+    marginBottom: 20,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    marginHorizontal: 4,
+  },
+  activeIndicator: {
+    backgroundColor: '#fff',
+    width: 16,
   },
   image: {
+    position: 'absolute',
     resizeMode: 'cover',
   },
   gradientOverlay: {
@@ -168,6 +180,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     minWidth: 120,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
   signUpButton: {
     backgroundColor: '#fff',

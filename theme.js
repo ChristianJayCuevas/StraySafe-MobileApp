@@ -20,7 +20,7 @@ export const theme = {
     titleFont: {
       fontSize: 28,
       fontWeight: 'bold',
-      color: '#000', // Dark gray
+      color: '#000', 
     },
     buttonText: {
       fontSize: 18,

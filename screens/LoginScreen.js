@@ -128,6 +128,11 @@ export default function LoginScreen({ onLogin }) {
             placeholderTextColor={theme.colors.textSecondary}
             value={username}
             onChangeText={setUsername}
+            accessibilityLabel="Username input"
+            accessibilityHint="Enter your username or email"
+            importantForAccessibility="yes"
+            autoComplete="username"
+            textContentType="username"
           />
 
           <TextInput
@@ -137,10 +142,21 @@ export default function LoginScreen({ onLogin }) {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
+            accessibilityLabel="Password input"
+            accessibilityHint="Enter your password"
+            importantForAccessibility="yes"
+            autoComplete="password"
+            textContentType="password"
           />
 
           {/* Login Button */}
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <TouchableOpacity 
+            style={styles.loginButton} 
+            onPress={handleLogin}
+            accessibilityRole="button"
+            accessibilityLabel="Login button"
+            accessibilityHint="Press to login with your credentials"
+          >
             <Text style={styles.loginButtonText}>Login</Text>
           </TouchableOpacity>
 
@@ -162,7 +178,12 @@ export default function LoginScreen({ onLogin }) {
           </View>
 
           {/* Sign up Link */}
-          <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('SignUp')}
+            accessibilityRole="button"
+            accessibilityLabel="Sign up link"
+            accessibilityHint="Navigate to sign up page"
+          >
   <Text style={styles.signUpText}>
     Don't have an account?{' '}
     <Text style={styles.signUpLink}>Sign up</Text>
@@ -234,6 +255,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.textPrimary,
     marginBottom: 20,
+    minHeight: 44, // Minimum touch target size for accessibility
   },
   loginButton: {
     width: '100%',
@@ -242,6 +264,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginBottom: 15,
+    minHeight: 44, // Minimum touch target size for accessibility
   },
   loginButtonText: {
     color: '#FFF',

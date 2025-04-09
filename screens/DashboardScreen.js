@@ -10,6 +10,8 @@ import {
 import { PieChart } from 'react-native-chart-kit';
 import { LineChart } from 'react-native-chart-kit';
 import { theme } from '../theme';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -75,7 +77,11 @@ export default function DashboardScreen() {
   ];
 
   const renderHeader = () => (
-    <View style={styles.headerContainer}>
+        <View style={styles.container}>
+          <LinearGradient
+      colors={[theme.colors.background, theme.colors.lightBlueAccent]}
+      style={styles.gradientBackground}
+      ></LinearGradient>
       <View style={styles.dashboardCard}>
         <View style={styles.statCard}>
           <Text style={styles.statTitle}>Total Stray Sightings</Text>
@@ -135,8 +141,7 @@ export default function DashboardScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: theme.colors.background,
+    padding: 20,  
   },
   headerContainer: {
     marginBottom: 20,

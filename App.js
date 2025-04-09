@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import {
   ActivityIndicator,
   View,
@@ -41,7 +42,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function App() {
+function MainApp() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -114,38 +115,49 @@ export default function App() {
     );
   }
 
+
+  
   return (
     <UserProvider>
       <PostProvider>
         <MapProvider>
           <NavigationContainer>
-            <Stack.Navigator
-              screenOptions={{
-                headerShown: false,
-              }}
-            >
-              {!isAuthenticated ? (
-                <>
-                  <Stack.Screen name="Welcome" component={WelcomeScreen} />
-                  <Stack.Screen name="Login">
+              <Stack.Navigator
+                screenOptions={{
+                  headerShown: false,
+                }}
+              >
+                {!isAuthenticated ? (
+                  <>
+                    <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                    <Stack.Screen name="Login">
+                      {(props) => (
+                        <LoginScreen {...props} onLogin={handleLogin} />
+                      )}
+                    </Stack.Screen>
+                    <Stack.Screen name="SignUp" component={SignUpScreen} />
+                  </>
+                ) : (
+                  <Stack.Screen name="MainApp">
                     {(props) => (
-                      <LoginScreen {...props} onLogin={handleLogin} />
+                      <TabNavigator {...props} onLogout={handleLogout} />
                     )}
                   </Stack.Screen>
-                  <Stack.Screen name="SignUp" component={SignUpScreen} />
-                </>
-              ) : (
-                <Stack.Screen name="MainApp">
-                  {(props) => (
-                    <TabNavigator {...props} onLogout={handleLogout} />
-                  )}
-                </Stack.Screen>
-              )}
-            </Stack.Navigator>
-          </NavigationContainer>
-        </MapProvider>
-      </PostProvider>
-    </UserProvider>
+                )}
+              </Stack.Navigator>
+            </NavigationContainer>
+          </MapProvider>
+        </PostProvider>
+      </UserProvider>
+  );
+}
+
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }
 

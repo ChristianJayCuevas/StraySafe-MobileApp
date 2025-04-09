@@ -3,6 +3,7 @@
     "name": "Stray Safe",
     "slug": "stray-safe",
     "version": "1.0.0",
+    "entryPoint": "index.js",
     "icon": "./assets/StraySafeLogo.png",
     "scheme": "straysafe",
     "android": {

@@ -29,7 +29,7 @@ export default function SignUpScreen({ navigation }) {
         username: username,
         email: email,
         password: password,
-        password_confirmation: confirmPassword, // For Laravel validation
+        password_confirmation: confirmPassword,
         contact_number: phoneNumber,
       };
   
@@ -38,7 +38,7 @@ export default function SignUpScreen({ navigation }) {
         requestData,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Use hardcoded token
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -47,7 +47,12 @@ export default function SignUpScreen({ navigation }) {
         alert(response.data.message);
         navigation.navigate("Login");
       } else {
-        alert("Error: " + JSON.stringify(response.data.message));
+        const errorMessage = response.data.message || "Registration failed";
+        if (typeof errorMessage === 'object') {
+          alert("Error: " + Object.values(errorMessage).join('\n'));
+        } else {
+          alert("Error: " + errorMessage);
+        }
       }
     } catch (error) {
       console.error("Error during sign-up:", error.response ? error.response.data : error);
@@ -55,9 +60,7 @@ export default function SignUpScreen({ navigation }) {
     }
   };
   
-
   return (
-    
     <ImageBackground
       source={require('../assets/wallpaper3.jpg')}
       style={styles.backgroundImage}
@@ -81,6 +84,11 @@ export default function SignUpScreen({ navigation }) {
             placeholderTextColor="#999"
             value={username}
             onChangeText={setUsername}
+            accessibilityLabel="Username input"
+            accessibilityHint="Enter your username"
+            importantForAccessibility="yes"
+            autoComplete="username"
+            textContentType="username"
           />
           <TextInput
             style={styles.input}
@@ -88,6 +96,12 @@ export default function SignUpScreen({ navigation }) {
             placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
+            accessibilityLabel="Email input"
+            accessibilityHint="Enter your email address"
+            importantForAccessibility="yes"
+            autoComplete="email"
+            textContentType="emailAddress"
+            keyboardType="email-address"
           />
           <TextInput
             style={styles.input}
@@ -96,6 +110,11 @@ export default function SignUpScreen({ navigation }) {
             keyboardType="phone-pad"
             value={phoneNumber}
             onChangeText={setPhoneNumber}
+            accessibilityLabel="Phone number input"
+            accessibilityHint="Enter your phone number"
+            importantForAccessibility="yes"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
           />
           <TextInput
             style={styles.input}
@@ -104,6 +123,11 @@ export default function SignUpScreen({ navigation }) {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
+            accessibilityLabel="Password input"
+            accessibilityHint="Enter your password"
+            importantForAccessibility="yes"
+            autoComplete="password"
+            textContentType="password"
           />
           <TextInput
             style={styles.input}
@@ -112,11 +136,27 @@ export default function SignUpScreen({ navigation }) {
             secureTextEntry
             value={confirmPassword}
             onChangeText={setConfirmPassword}
+            accessibilityLabel="Confirm password input"
+            accessibilityHint="Re-enter your password"
+            importantForAccessibility="yes"
+            autoComplete="password"
+            textContentType="password"
           />
-          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+          <TouchableOpacity 
+            style={styles.signUpButton} 
+            onPress={handleSignUp}
+            accessibilityRole="button"
+            accessibilityLabel="Sign up button"
+            accessibilityHint="Press to create your account"
+          >
             <Text style={styles.signUpButtonText}>Sign Up</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('Login')}
+            accessibilityRole="button"
+            accessibilityLabel="Login link"
+            accessibilityHint="Navigate to login page"
+          >
             <Text style={styles.loginRedirectText}>
               Already have an account? <Text style={styles.loginRedirectLink}>Log in</Text>
             </Text>
@@ -184,8 +224,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#d4d8be',
     paddingHorizontal: 15,
     fontSize: 16,
-    color: '#0000',
+    color: '#000',
     marginBottom: 20,
+    minHeight: 44, // Minimum touch target size for accessibility
   },
   signUpButton: {
     width: '100%',
@@ -194,6 +235,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginBottom: 15,
+    minHeight: 44, // Minimum touch target size for accessibility
   },
   signUpButtonText: {
     color: '#FFF',
