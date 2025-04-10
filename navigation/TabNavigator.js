@@ -14,6 +14,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { NetworkProvider, useNetwork } from '../context/NetworkContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -26,25 +27,37 @@ function CustomHeader() {
     navigation.dispatch(DrawerActions.openDrawer());
   };
 
+  const { theme, themeMode, toggleTheme } = useTheme();
+
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer, { backgroundColor: theme.colors.primary }]}>
       <View style={styles.headerContent}>
         {/* Left menu icon */}
         <TouchableOpacity onPress={openDrawer} style={styles.iconContainer}>
-          <Ionicons name="menu" size={28} color="#FFFFFF" />
+          <Ionicons name="menu" size={28} color={theme.colors.textPrimary} />
         </TouchableOpacity>
 
-        {/* Centered logo */}
+        {/* Centered logo with text */}
         <View style={styles.centerContainer}>
-          <Image
-            source={require('../assets/LOGO.png')}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Image
+              source={require('../assets/NEWLOGO.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <Text style={[styles.logoText, {color: theme.colors.highlight, marginLeft: -60}]}>Stray</Text>
+            <Text style={[styles.logoText, {color: '#506643', marginLeft: 0}]}>Safe</Text>
+          </View>
         </View>
 
-        {/* Right placeholder for symmetry */}
-        <View style={styles.iconContainer} />
+        {/* Right theme toggle button */}
+        <TouchableOpacity onPress={toggleTheme} style={styles.iconContainer}>
+          <Ionicons 
+            name={themeMode === 'dark' ? 'sunny' : 'moon'} 
+            size={24} 
+            color={theme.colors.textPrimary} 
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -111,6 +124,8 @@ function SettingsStackNavigator() {
 }
 
 function TabNavigator() {
+  const { theme } = useTheme();
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -129,12 +144,11 @@ function TabNavigator() {
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.textSecondary,
+        tabBarActiveTintColor: theme.colors.activeTab,
+        tabBarInactiveTintColor: theme.colors.textPrimary,
         tabBarStyle: {
-          backgroundColor: theme.colors.background,
-          borderTopWidth: 1,
-          borderTopColor: theme.colors.highlight,
+          backgroundColor: theme.colors.primary,
+          borderTopWidth: 0,
           height: 90,
           paddingBottom: 30,
           paddingTop: 10,
@@ -253,10 +267,11 @@ function NetworkAwareApp({ onLogout }) {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: '#d4d8be',
-    paddingTop: 1,
-    paddingBottom: 1,
+    backgroundColor: theme.colors.primary,
+    paddingTop: 15,
+    paddingBottom: 15,
     paddingHorizontal: 16,
+    height: 80,
   },
   headerContent: {
     flexDirection: 'row',
@@ -274,8 +289,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoImage: {
-    width: 250,
-    height: 75,
+    width: 200,
+    height: 60,
+    marginLeft: -60,
+    margin: 0,
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   logoutText: {
     color: '#FF3B30',

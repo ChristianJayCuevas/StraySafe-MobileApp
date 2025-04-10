@@ -4,11 +4,11 @@ const { width, height } = Dimensions.get('window');
 
 export const theme = {
   colors: {
-    background: '#f4f5dd', // Light beige/cream background
+    background: 'white', // Light beige/cream background
     primary: '#506643', // Teal for buttons and interactive elements
     textPrimary: '#2C2C2C', // Dark gray for main text
     textSecondary: '#5A5A5A', // Medium gray for secondary text
-    highlight: '#F2D8B1', // Soft peach highlight for inputs and secondary elements
+    highlight: '#506643', // Soft peach highlight for inputs and secondary elements
     orangeAccent: '#F4A261', // Orange for graphic accents
     lightBlueAccent: '#A8DADC', // Light blue for graphic accents
   },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, ThemeContext } from './context/ThemeContext';
 import {
   ActivityIndicator,
   View,
@@ -156,7 +156,13 @@ function MainApp() {
 export default function App() {
   return (
     <ThemeProvider>
-      <MainApp />
+      <ThemeContext.Consumer>
+        {({theme}) => (
+          <View style={{flex: 1, backgroundColor: theme.colors.background}}>
+            <MainApp />
+          </View>
+        )}
+      </ThemeContext.Consumer>
     </ThemeProvider>
   );
 }
