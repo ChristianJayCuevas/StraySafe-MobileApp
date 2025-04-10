@@ -123,6 +123,18 @@ function SettingsStackNavigator() {
   );
 }
 
+function ProfileStackNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="ProfileMain"
+        component={ProfileScreen}
+        options={{ header: () => <CustomHeader /> }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function TabNavigator() {
   const { theme } = useTheme();
   
@@ -165,11 +177,6 @@ function TabNavigator() {
         options={{ tabBarLabel: 'Map', headerShown: false }}
       />
       <Tab.Screen
-        name="Dashboard"
-        component={DashboardStackNavigator}
-        options={{ tabBarLabel: 'Dashboard', headerShown: false }}
-      />
-      <Tab.Screen
         name="RegisterPet"
         component={FeedStackNavigator}
         options={{ tabBarLabel: 'Register', headerShown: false }}
@@ -178,6 +185,17 @@ function TabNavigator() {
         name="Notifications"
         component={NotificationsStackNavigator}
         options={{ tabBarLabel: 'Notifications', headerShown: false }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileStackNavigator}
+        options={{ 
+          tabBarLabel: 'Profile',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          )
+        }}
       />
     </Tab.Navigator>
   );

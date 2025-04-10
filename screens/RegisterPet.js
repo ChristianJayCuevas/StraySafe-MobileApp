@@ -16,6 +16,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { useUserContext } from '../context/UserContext';
+import { LinearGradient } from 'expo-linear-gradient';
+
 export default function RegisterPet() {
   const [petName, setPetName] = useState('');
   const [petType, setPetType] = useState('');
@@ -209,7 +211,15 @@ export default function RegisterPet() {
     }
   };
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 20 }}>
+<View style={styles.container}>
+  <LinearGradient
+    colors={['#4a90e2', '#87cefa']}
+    style={styles.gradientBackground}
+  >
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: 20 }}
+      style={styles.scrollView}
+    >
       <Text style={styles.title}>Register Your Pet</Text>
       <TouchableOpacity style={styles.imageContainer} onPress={handleAddPhoto}>
         {petImage ? (
@@ -289,12 +299,17 @@ export default function RegisterPet() {
         </View>
       </Modal>
     </ScrollView>
+    </LinearGradient>
+    </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  gradientBackground: {
+    flex: 1,
     padding: 20,
   },
   title: {

@@ -4,7 +4,7 @@ const { width, height } = Dimensions.get('window');
 
 export const theme = {
   colors: {
-    background: 'white', // Light beige/cream background
+    background: '#Aec3b0', // Light beige/cream background
     primary: '#506643', // Teal for buttons and interactive elements
     textPrimary: '#2C2C2C', // Dark gray for main text
     textSecondary: '#5A5A5A', // Medium gray for secondary text
