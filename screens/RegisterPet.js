@@ -14,9 +14,9 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../theme';
 import { useUserContext } from '../context/UserContext';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function RegisterPet() {
   const [petName, setPetName] = useState('');
@@ -212,31 +212,46 @@ export default function RegisterPet() {
   };
   return (
 <View style={styles.container}>
-  <LinearGradient
-    colors={['#4a90e2', '#87cefa']}
-    style={styles.gradientBackground}
-  >
+  <View style={styles.gradientBackground}>
     <ScrollView
       contentContainerStyle={{ paddingBottom: 20 }}
       style={styles.scrollView}
     >
       <Text style={styles.title}>Register Your Pet</Text>
-      <TouchableOpacity style={styles.imageContainer} onPress={handleAddPhoto}>
-        {petImage ? (
-          <Image source={{ uri: petImage }} style={styles.petImage} />
-        ) : (
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="camera-outline" size={40} color={theme.colors.textSecondary} />
-            <Text style={styles.imageText}>Add Pet Photo</Text>
-          </View>
+      <View style={styles.imageWrapper}>
+        <TouchableOpacity style={styles.imageContainer} onPress={handleAddPhoto}>
+          {petImage ? (
+            <Image source={{ uri: petImage }} style={styles.petImage} />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="camera-outline" size={48} color={theme.colors.textSecondary} />
+              <Text style={styles.imageText}>Add Pet Photo</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        {petImage && (
+          <TouchableOpacity style={styles.addPhotoIcon} onPress={handleAddPhoto}>
+            <Ionicons name="camera" size={20} color="#FFF" />
+          </TouchableOpacity>
         )}
-      </TouchableOpacity>
+      </View>
       {detectionResult && (
-        <View style={styles.resultContainer}>
+        <LinearGradient
+          colors={['#addfad', '#32cd32']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.resultContainer}
+        >
           <Text style={styles.resultText}>
-            Detected: {detectionResult.label} (Confidence: {(detectionResult.confidence * 100).toFixed(2)}%)
+            Detected: {detectionResult.label} (Confidence: 
+              <Text style={{
+                color: 'black',
+                fontWeight: 'bold'
+              }}>
+                {(detectionResult.confidence * 100).toFixed(2)}%
+              </Text>)
           </Text>
-        </View>
+        </LinearGradient>
       )}
       <View style={styles.inputContainer}>
         <TextInput
@@ -299,7 +314,7 @@ export default function RegisterPet() {
         </View>
       </Modal>
     </ScrollView>
-    </LinearGradient>
+    </View>
     </View>
   );
 }
@@ -310,117 +325,165 @@ const styles = StyleSheet.create({
   },
   gradientBackground: {
     flex: 1,
-    padding: 20,
+    padding: 24,
+    backgroundColor: theme.colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '700',
     color: theme.colors.textPrimary,
-    marginBottom: 20,
+    marginBottom: 32,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   imageContainer: {
     alignSelf: 'center',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     overflow: 'hidden',
-    backgroundColor: theme.colors.lightGrey,
+    backgroundColor: '#F8F9FA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    borderWidth: 5,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    position: 'relative',
   },
   petImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 75,
   },
   imagePlaceholder: {
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   imageText: {
-    marginTop: 10,
-    fontSize: 14,
+    marginTop: 15,
+    fontSize: 16,
     color: theme.colors.textSecondary,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  imageWrapper: {
+    position: 'relative',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  addPhotoIcon: {
+    position: 'absolute',
+    bottom: 40,
+    right: 10,
+    backgroundColor: theme.colors.primary,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   resultContainer: {
-    backgroundColor: theme.colors.lightBlueAccent,
     padding: 15,
     borderRadius: 10,
-    marginVertical: 20,
+    marginTop: 0,
+    marginBottom: 20,
     alignItems: 'center',
+    width: '80%',
+    alignSelf: 'center',
   },
   resultText: {
     fontSize: 16,
     color: theme.colors.textPrimary,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: theme.colors.highlight,
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 12,
+    padding: 16,
     fontSize: 16,
     color: theme.colors.textPrimary,
-    marginBottom: 15,
+    marginBottom: 18,
     backgroundColor: '#FFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   registerButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: theme.colors.primary,
-    paddingVertical: 15,
-    borderRadius: 10,
-    elevation: 3,
+    paddingVertical: 16,
+    borderRadius: 12,
+    elevation: 5,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   registerButtonText: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     marginLeft: 10,
-  },
-  disabledButton: {
-    backgroundColor: theme.colors.lightGrey,
+    letterSpacing: 0.5,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContainer: {
-    width: '80%',
-    backgroundColor: '#FFF', // White modal container
-    borderRadius: 10,
-    padding: 20,
+    width: '85%',
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 25,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowRadius: 6,
+    elevation: 8,
   },
   modalMessage: {
     marginTop: 20,
     fontSize: 16,
     color: theme.colors.textPrimary,
     textAlign: 'center',
+    lineHeight: 24,
   },
   closeButton: {
-    marginTop: 20,
+    marginTop: 25,
     backgroundColor: theme.colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
   },
   closeButtonText: {
     fontSize: 16,
     color: '#FFF',
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });

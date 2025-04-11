@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../theme';
 import { useUserContext } from '../context/UserContext';
@@ -30,7 +29,7 @@ export default function ProfileScreen() {
   const [registeredPets, setRegisteredPets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(user?.userData?.profile_image_link || null);
   const [isProcessing, setIsProcessing] = useState(false);
   const token = 'StraySafeTeam3';
 
@@ -71,8 +70,12 @@ export default function ProfileScreen() {
         if (response.ok) {
           const imageUrl = data.secure_url;
   
-          // Update the local profile picture state immediately
+          // Update local state and context directly
           setProfilePicture(imageUrl);
+          // Update context by mutating the userData object
+          if (user?.userData) {
+            user.userData.profile_image_link = imageUrl;
+          }
   
           console.log('Image uploaded to Cloudinary. URL:', imageUrl);
   
@@ -246,101 +249,159 @@ export default function ProfileScreen() {
 
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-  colors={[theme.colors.background, theme.colors.lightBlueAccent]}
-  style={styles.gradientBackground}
->
-  {/* User Info Section */}
-  <View style={styles.profileContainer}>
-    <TouchableOpacity onPress={handleProfilePictureChange}>
-      {user?.profile_image_link ? (
-        <Image
-          source={{ uri: profilePicture || user?.profile_image_link }}
-          style={styles.profileImage}
+    <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      {/* User Info Section */}
+      <View style={styles.profileContainer}>
+        <View style={styles.profileImageContainer}>
+          <TouchableOpacity onPress={handleProfilePictureChange}>
+            {profilePicture || user?.userData?.profile_image_link ? (
+              <Image
+                source={{ uri: profilePicture || user?.userData?.profile_image_link }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <View style={styles.addPhotoContainer}>
+                <Ionicons name="camera" size={32} color={theme.colors.textSecondary} />
+                <Text style={styles.addPhotoText}>Tap to add photo</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.cameraIconContainer}
+            onPress={handleProfilePictureChange}
+          >
+            <Ionicons name="camera" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+        {isProcessing && <ActivityIndicator size="small" color={theme.colors.primary} />}
+        <Text style={styles.userName}>
+          {user?.userData?.name || 'Your Name'}
+        </Text>
+        <Text style={styles.userEmail}>
+          {user?.userData?.email || 'your.email@gmail.com'}
+        </Text>
+        <Text style={styles.userContact}>
+          {user?.userData?.contact_number || 'No contact number provided'}
+        </Text>
+      </View>
+
+      {/* Registered Pets Section */}
+      <Text style={styles.sectionTitle}>My Registered Pets</Text>
+      {loading ? (
+        <Text style={styles.loadingText}>Loading your pets...</Text>
+      ) : registeredPets.length > 0 ? (
+        <FlatList
+          data={registeredPets}
+          renderItem={renderPetCard}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.petList}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       ) : (
-        <Ionicons
-          name="person-circle-outline"
-          size={100}
-          color={theme.colors.primary}
-        />
+        <Text style={styles.noPetsText}>You don't have any registered pets yet.</Text>
       )}
-    </TouchableOpacity>
-    {isProcessing && <ActivityIndicator size="small" color={theme.colors.primary} />}
-    <Text style={styles.userName}>
-      {user?.userData?.name || 'Your Name'}
-    </Text>
-    <Text style={styles.userEmail}>
-      {user?.userData?.email || 'your.email@gmail.com'}
-    </Text>
-    <Text style={styles.userContact}>
-      {user?.userData?.contact_number || 'No contact number provided'}
-    </Text>
-  </View>
-
-  {/* Registered Pets Section */}
-  <Text style={styles.sectionTitle}>My Registered Pets</Text>
-  {loading ? (
-    <Text style={styles.loadingText}>Loading your pets...</Text>
-  ) : registeredPets.length > 0 ? (
-    <FlatList
-      data={registeredPets}
-      renderItem={renderPetCard}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={styles.petList}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    />
-  ) : (
-    <Text style={styles.noPetsText}>You don't have any registered pets yet.</Text>
-  )}
-
-</LinearGradient>  
-</View>  
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  profileImageContainer: {
+    position: 'relative',
+    marginBottom: 20,
+  },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+    width: 175,
+    height: 175,
+    borderRadius: 87.5,
+    borderWidth: 5,
+    borderColor: theme.colors.primary,
+  },
+  cameraIconContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: theme.colors.primary,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  addPhotoContainer: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 3,
+    borderColor: theme.colors.primaryLight,
+    marginBottom: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
+  },
+  addPhotoText: {
+    color: theme.colors.textSecondary,
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: '500',
   },
   container: {
-    flex: 1,
-  },
-  gradientBackground: {
     flex: 1,
     padding: 20,
   },
   profileContainer: {
     alignItems: 'center',
     marginBottom: 30,
+    padding: 24,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    width: '90%',
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F3F5',
   },
   userName: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '700',
     color: theme.colors.textPrimary,
-    marginTop: 10,
+    marginTop: 16,
+    textAlign: 'center',
+    letterSpacing: 0.3,
   },
   userEmail: {
     fontSize: 16,
     color: theme.colors.textSecondary,
-    marginTop: 5,
+    marginTop: 8,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   userContact: {
     fontSize: 16,
     color: theme.colors.textSecondary,
-    marginTop: 5,
+    marginTop: 8,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: theme.colors.primary,
-    marginBottom: 10,
+    marginBottom: 15,
+    marginTop: 10,
+    letterSpacing: 0.5,
   },
   noPetsText: {
     fontSize: 16,
