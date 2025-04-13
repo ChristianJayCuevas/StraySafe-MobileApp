@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -11,6 +11,12 @@ import TestNotificationButton from '../components/TestNotificationButton';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function SettingsScreen() {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  const toggleNotifications = () => {
+    setNotificationsEnabled(!notificationsEnabled);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
@@ -18,6 +24,11 @@ export default function SettingsScreen() {
         <Text style={styles.sectionDescription}>
           Configure pet detection notifications and check status
         </Text>
+        <TouchableOpacity onPress={toggleNotifications} style={styles.toggleButton}>
+          <Text style={styles.toggleButtonText}>
+            {notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}
+          </Text>
+        </TouchableOpacity>
         <TestNotificationButton />
       </View>
 
@@ -72,5 +83,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
     color: theme.colors.textPrimary,
-  }
+  },
+  toggleButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  toggleButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });

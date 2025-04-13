@@ -255,7 +255,7 @@ function NetworkAwareApp({ onLogout }) {
         />
         <Drawer.Screen
           name="Settings"
-          component={SettingsStackNavigator}
+          component={SettingsScreen}
           options={{
             drawerLabel: 'Settings',
             header: () => <CustomHeader />,
