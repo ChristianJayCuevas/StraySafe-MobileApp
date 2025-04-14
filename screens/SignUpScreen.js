@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     borderRadius: 10,
-    backgroundColor: '#d4d8be',
+    backgroundColor: '#D3D3D3',
     paddingHorizontal: 15,
     fontSize: 16,
     color: '#000',

@@ -124,7 +124,7 @@ export default function LoginScreen({ onLogin }) {
           {/* Input */}
           <TextInput
             style={styles.input}
-            placeholder="Username"
+            placeholder="Email"
             placeholderTextColor={theme.colors.textSecondary}
             value={username}
             onChangeText={setUsername}
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     borderRadius: 10,
-    backgroundColor: '#d4d8be',
+    backgroundColor: '#D3D3D3',
     paddingHorizontal: 15,
     fontSize: 16,
     color: theme.colors.textPrimary,

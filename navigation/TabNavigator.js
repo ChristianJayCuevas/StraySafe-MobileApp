@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,  } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { NetworkProvider, useNetwork } from '../context/NetworkContext';
 import { useTheme } from '../context/ThemeContext';
+import { useUserContext } from '../context/UserContext';
+import { DrawerItemList } from '@react-navigation/drawer';
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -62,6 +64,7 @@ function CustomHeader() {
     </View>
   );
 }
+
 
 function FeedStackNavigator() {
   return (
@@ -212,6 +215,7 @@ export default function DrawerNavigator({ onLogout }) {
 function NetworkAwareApp({ onLogout }) {
   const { isConnected } = useNetwork();
   const navigation = useNavigation();
+  const { user } = useUserContext();
 
   const handleLogout = () => {
     if (onLogout) {
@@ -227,9 +231,40 @@ function NetworkAwareApp({ onLogout }) {
           drawerPosition: 'left',
           drawerType: 'slide',
           drawerStyle: {
-            backgroundColor: theme.colors.background,
+            backgroundColor: '#f4f5dd',
           },
         }}
+        drawerContent={(props) => (
+          <View style={{ flex: 1 }}>
+            {/* Drawer Header with User Info */}
+            <View style={styles.drawerHeader}>
+              {(user?.userData?.profile_image_link || user?.photoURL) && (
+                <Image 
+                  source={{ uri: user.userData?.profile_image_link || user.photoURL }} 
+                  style={styles.userPhoto}
+                />
+              )}
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>
+                  {user?.userData?.name || 'Guest User'}
+                </Text>
+                <Text style={styles.userEmail}>
+                  {user?.userData?.email || ''}
+                </Text>
+              </View>
+            </View>
+            {/* Default Drawer Items */}
+            <DrawerItemList {...props} />
+            
+            {/* Separator before the logout button */}
+            <View style={{ height: 1, backgroundColor: theme.colors.border, marginVertical: 8 }} />
+            
+            {/* App version at bottom of drawer */}
+            <View style={{ padding: 16, alignItems: 'center', marginTop: 'auto' }}>
+              <Text style={{ color: theme.colors.textSecondary, fontSize: 12 }}>Stray Safe v1.0</Text>
+            </View>
+          </View>
+        )}
       >
         <Drawer.Screen
           name="MainTabs"
@@ -266,12 +301,15 @@ function NetworkAwareApp({ onLogout }) {
         />
         <Drawer.Screen
           name="Logout"
-          component={FeedScreen}
+          component={() => null} // No component needed
+          listeners={{
+            focus: handleLogout // Trigger logout when this drawer item is pressed
+          }}
           options={{
             drawerLabel: () => (
-              <TouchableOpacity onPress={handleLogout}>
+              <View>
                 <Text style={styles.logoutText}>Logout</Text>
-              </TouchableOpacity>
+              </View>
             ),
             drawerIcon: ({ color, size }) => (
               <Ionicons name="log-out-outline" size={size} color={color} />
@@ -284,6 +322,50 @@ function NetworkAwareApp({ onLogout }) {
 }
 
 const styles = StyleSheet.create({
+  drawerHeader: {
+    padding: 24,
+    paddingBottom: 20,
+    borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  userPhoto: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: 'rgba(0, 0, 0, 0.8)',
+    marginBottom: 12,
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  userInfo: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+    marginBottom: 6,
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  userEmail: {
+    fontSize: 15,
+    color: 'black',
+    textAlign: 'center',
+    letterSpacing: 0.3,
+    opacity: 0.9,
+  },
   headerContainer: {
     backgroundColor: theme.colors.primary,
     paddingTop: 15,

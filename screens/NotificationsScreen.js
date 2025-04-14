@@ -6,6 +6,9 @@ import {
   Image,
   Text,
   StyleSheet,
+  Modal,
+  ScrollView,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +17,7 @@ import { theme } from '../theme';
 
 export default function NotificationsScreen() {
   const navigation = useNavigation();
+  const [selectedNotification, setSelectedNotification] = useState(null);
 
   // Initial mock notifications including pet detection
   const [notifications, setNotifications] = useState([
@@ -106,26 +110,46 @@ export default function NotificationsScreen() {
   };
 
   const handleNotificationClick = (item) => {
-    if (item.type === 'pet_detection') {
-      // For pet detection, just show an alert with the details
-      alert(`${item.data.animalType.charAt(0).toUpperCase() + item.data.animalType.slice(1)} Detection
-Camera: ${item.data.cameraId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-New count: ${item.data.newCount}
-Total count: ${item.data.count}`);
-    } 
-    else if (item.type === 'pet_report' && item.post) {
-      // For post-related notifications, navigate to Details
-      navigation.navigate('FeedDetails', {
-        image: item.post.image,
-        location: item.post.location,
-        likes: item.post.likes,
-        comments: item.post.comments,
-        shares: item.post.shares,
-        type: item.post.type,
-        contactNumber: item.post.contactNumber || 'No contact number provided',
-        postContent: item.post.postContent || 'No content provided.',
-      });
-    }
+    setSelectedNotification(item);
+  };
+
+  const renderNotificationDetails = () => {
+    if (!selectedNotification) return null;
+    
+    return (
+      <View style={styles.detailsContainer}>
+        <Image 
+          source={selectedNotification.icon} 
+          style={styles.detailsIcon} 
+        />
+        <Text style={styles.detailsTitle}>{selectedNotification.title}</Text>
+        <Text style={styles.detailsDescription}>{selectedNotification.description}</Text>
+        <Text style={styles.detailsTimestamp}>{selectedNotification.timestamp}</Text>
+        
+        {selectedNotification.type === 'pet_detection' && (
+          <View style={styles.detailsSection}>
+            <Text style={styles.detailsSubtitle}>Detection Details:</Text>
+            <Text>Animal: {selectedNotification.data.animalType}</Text>
+            <Text>Camera: {selectedNotification.data.cameraId}</Text>
+            <Text>New Count: {selectedNotification.data.newCount}</Text>
+            <Text>Total Count: {selectedNotification.data.count}</Text>
+          </View>
+        )}
+        
+        {selectedNotification.type === 'pet_report' && selectedNotification.post && (
+          <View style={styles.detailsSection}>
+            <Text style={styles.detailsSubtitle}>Report Details:</Text>
+            <Text>Location: {selectedNotification.post.location}</Text>
+            <Text>Type: {selectedNotification.post.type}</Text>
+            <Text>Contact: {selectedNotification.post.contactNumber || 'None'}</Text>
+            <Text>Likes: {selectedNotification.post.likes}</Text>
+            <Text>Comments: {selectedNotification.post.comments}</Text>
+            <Text>Shares: {selectedNotification.post.shares}</Text>
+            <Text>Content: {selectedNotification.post.postContent}</Text>
+          </View>
+        )}
+      </View>
+    );
   };
 
   const renderNotification = ({ item }) => (
@@ -151,11 +175,97 @@ Total count: ${item.data.count}`);
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
+      
+      <Modal
+        visible={!!selectedNotification}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setSelectedNotification(null)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <ScrollView>
+              {renderNotificationDetails()}
+            </ScrollView>
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setSelectedNotification(null)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+  },
+  closeButton: {
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  detailsContainer: {
+    padding: 10,
+  },
+  detailsIcon: {
+    width: 250,
+    height: 250,
+    alignSelf: 'center',
+    marginBottom: 15,
+  },
+  detailsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 5,
+    color: theme.colors.textPrimary,
+  },
+  detailsDescription: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
+    color: theme.colors.textSecondary,
+  },
+  detailsTimestamp: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 15,
+    color: theme.colors.textSecondary,
+  },
+  detailsSubtitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 5,
+    color: theme.colors.textPrimary,
+  },
+  detailsSection: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
