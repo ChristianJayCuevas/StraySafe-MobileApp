@@ -90,7 +90,7 @@ function NotificationsStackNavigator() {
   );
 }
 
-function MapStackNavigator() {
+/*function MapStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -100,7 +100,7 @@ function MapStackNavigator() {
       />
     </Stack.Navigator>
   );
-}
+} */
 
 function DashboardStackNavigator() {
   return (
@@ -174,11 +174,16 @@ function TabNavigator() {
         },
       })}
     >
+
+      
+      {/*
       <Tab.Screen
         name="Map"
         component={MapStackNavigator}
         options={{ tabBarLabel: 'Map', headerShown: false }}
       />
+      */}
+      
       <Tab.Screen
         name="RegisterPet"
         component={FeedStackNavigator}

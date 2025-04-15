@@ -19,95 +19,65 @@ export default function NotificationsScreen() {
   const navigation = useNavigation();
   const [selectedNotification, setSelectedNotification] = useState(null);
 
-  // Initial mock notifications including pet detection
-  const [notifications, setNotifications] = useState([
-    {
-      id: '1',
-      title: 'Dog Detection',
-      description: '3 dogs detected on Camera 5.',
-      timestamp: '2 hours ago',
-      icon: require('../assets/Snapshot1.jpg'),
-      type: 'pet_detection',
-      data: {
-        cameraId: 'cam-5',
-        animalType: 'dog',
-        count: 5,
-        newCount: 3,
-      }
-    },
-    {
-      id: '2',
-      title: 'Cat Detection',
-      description: '2 cats detected on Static Demo camera.',
-      timestamp: '3 hours ago',
-      icon: require('../assets/Snapshot5.png'),
-      type: 'pet_detection',
-      data: {
-        cameraId: 'static-demo',
-        animalType: 'cat',
-        count: 2,
-        newCount: 2,
-      }
-    },
-    {
-      id: '3',
-      title: 'Stray Dog Sighting',
-      description: 'A stray dog was sighted near the Limbaga Street.',
-      timestamp: '4 hours ago',
-      icon: require('../assets/Snapshot5.png'),
-      type: 'pet_report',
-      post: {
-        image: require('../assets/Snapshot5.png'),
-        location: 'Limbaga Street',
-        likes: 10,
-        comments: 2,
-        shares: 1,
-        type: 'Stray Dog',
-        contactNumber: 'None',
-        postContent: 'This dog is found near the Limbaga Street.',
-      },
-    }
-  ]);
+  const [notifications, setNotifications] = useState([]);
+
 
   useEffect(() => {
-    // Listen for incoming notifications
-    const subscription = Notifications.addNotificationReceivedListener((notification) => {
-      const notificationData = notification.request.content.data;
-      const title = notification.request.content.title;
-      const body = notification.request.content.body;
-      
-      // Create a new notification object
-      const newNotification = {
-        id: Date.now().toString(),
-        title: title || 'New Notification',
-        description: body || '',
-        timestamp: 'Just now',
-        type: notificationData.type || 'unknown',
-        icon: getIconForNotificationType(notificationData.type, notificationData.animalType),
-        data: notificationData
-      };
+    // Fetch notifications from API
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch('https://straysafe.me/api2/detected');
+        const data = await response.json();
 
-      // Add the new notification to the list
-      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
-    });
+        // Check if data.detected_animals is an array
+        if (!data.detected_animals || !Array.isArray(data.detected_animals)) {
+          console.error('API response does not contain detected_animals array:', data);
+          setNotifications([]);
+          return;
+        }
 
-    // Cleanup listener on unmount
-    return () => subscription.remove();
+        // Map API data to notification objects
+        const mappedNotifications = data.detected_animals.map((item) => {
+          let icon;
+          if (item.image_url) {
+            icon = { uri: 'https://straysafe.me/api2/debug-img' + item.image_url.substring('/api2/detected-img'.length) };
+          } else if (item.animal_type === 'dog') {
+            icon = require('../assets/Snapshot1.jpg');
+          } else if (item.animal_type === 'cat') {
+            icon = require('../assets/Snapshot4.png');
+          } else {
+            icon = require('../assets/icon.png');
+          }
+
+          return {
+            id: item.id ? item.id.toString() : Date.now().toString(),
+            title: 'Animal Detected',
+            description: `Classification: ${item.classification}`,
+            timestamp: item.timestamp || '',
+            type: 'pet_detection',
+            icon: icon,
+            data: {
+              animalType: item.animal_type,
+              cameraId: item.stream_id,
+              newCount: null,
+              count: null,
+            },
+            post: null,
+          };
+        });
+
+        setNotifications(mappedNotifications);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, 10000); // fetch every 10 seconds
+
+    return () => clearInterval(intervalId);
   }, []);
   
-  // Get the appropriate icon based on notification type
-  const getIconForNotificationType = (type, animalType) => {
-    if (type === 'pet_detection') {
-      if (animalType === 'dog') {
-        return require('../assets/Snapshot1.jpg');
-      } else if (animalType === 'cat') {
-        return require('../assets/Snapshot4.png');
-      }
-    }
-    
-    // Default icon
-    return require('../assets/icon.png');
-  };
 
   const handleNotificationClick = (item) => {
     setSelectedNotification(item);
