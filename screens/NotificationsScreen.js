@@ -6,6 +6,7 @@ import {
   Image,
   Text,
   StyleSheet,
+  Button,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -66,6 +67,15 @@ export default function NotificationsScreen() {
   ]);
 
   useEffect(() => {
+    // Request notification permissions on mount
+    async function requestPermissions() {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        await Notifications.requestPermissionsAsync();
+      }
+    }
+    requestPermissions();
+
     // Listen for incoming notifications
     const subscription = Notifications.addNotificationReceivedListener((notification) => {
       const notificationData = notification.request.content.data;
@@ -128,6 +138,18 @@ Total count: ${item.data.count}`);
     }
   };
 
+  // Function to trigger a test push notification
+  const triggerTestNotification = async () => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Test Notification",
+        body: "This is a test push notification.",
+        data: { type: 'test' },
+      },
+      trigger: null,
+    });
+  };
+
   const renderNotification = ({ item }) => (
     <TouchableOpacity
       style={styles.notificationCard}
@@ -151,6 +173,9 @@ Total count: ${item.data.count}`);
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
+      <View style={styles.buttonContainer}>
+        <Button title="Send Test Notification" onPress={triggerTestNotification} />
+      </View>
     </View>
   );
 }
@@ -200,5 +225,22 @@ const styles = StyleSheet.create({
   notificationTimestamp: {
     fontSize: 12,
     color: theme.colors.textSecondary,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginHorizontal: 'auto',
   },
 });

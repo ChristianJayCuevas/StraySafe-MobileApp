@@ -8,6 +8,8 @@ import {
   Image,
   ActivityIndicator,
   Dimensions,
+  Modal,
+  TextInput,
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -57,6 +59,10 @@ export default function MapScreen() {
       type: 'cat',
     },
   ]);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [longitudeInput, setLongitudeInput] = useState('');
+  const [latitudeInput, setLatitudeInput] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -159,19 +165,87 @@ export default function MapScreen() {
             <Text style={styles.loadingText}>Loading map...</Text>
           </View>
         ) : (
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            initialRegion={userLocation}
-            onMapReady={onMapReady}
-            showsUserLocation={true}
-            showsMyLocationButton={true}
-            loadingEnabled={true}
-            loadingIndicatorColor={theme.colors.primary}
-            loadingBackgroundColor="#f9f9f9"
-          >
-            {markers.map(marker => renderMarker(marker))}
-          </MapView>
+          <>
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={styles.map}
+              initialRegion={userLocation}
+              onMapReady={onMapReady}
+              showsUserLocation={true}
+              showsMyLocationButton={true}
+              loadingEnabled={true}
+              loadingIndicatorColor={theme.colors.primary}
+              loadingBackgroundColor="#f9f9f9"
+            >
+              {markers.map(marker => renderMarker(marker))}
+            </MapView>
+            <TouchableOpacity
+              style={styles.plusButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.plusButtonText}>+</Text>
+            </TouchableOpacity>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Add Marker</Text>
+                <Text style={styles.modalDescription}>A stray animal is spotted here.</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Longitude"
+                  keyboardType="numeric"
+                  value={longitudeInput}
+                  onChangeText={setLongitudeInput}
+                  placeholderTextColor="#666"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Latitude"
+                  keyboardType="numeric"
+                  value={latitudeInput}
+                  onChangeText={setLatitudeInput}
+                  placeholderTextColor="#666"
+                />
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={() => {
+                    const lon = parseFloat(longitudeInput);
+                    const lat = parseFloat(latitudeInput);
+                    if (isNaN(lon) || isNaN(lat)) {
+                      Alert.alert('Invalid input', 'Please enter valid numeric longitude and latitude.');
+                      return;
+                    }
+                      const newMarker = {
+                        id: `${Date.now()}`,
+                        latitude: lat,
+                        longitude: lon,
+                        title: 'Stray detected here',
+                        description: 'Location',
+                        type: 'custom',
+                      };
+                      setMarkers(prevMarkers => [...prevMarkers, newMarker]);
+                      setModalVisible(false);
+                      setLongitudeInput('');
+                      setLatitudeInput('');
+                  }}
+                >
+                  <Text style={styles.addButtonText}>Add Marker</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+              </View>
+            </Modal>
+          </>
         )}
       </View>
     </View>
@@ -237,5 +311,111 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: theme.colors.primary,
+  },
+  plusButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    backgroundColor: theme.colors.primary,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  plusButtonText: {
+    color: '#fff',
+    fontSize: 40,
+    lineHeight: 50,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalDescription: {
+    fontSize: 16,
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#444',
+  },
+  input: {
+    width: '90%',
+    height: 45,
+    borderColor: '#bbb',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    color: '#222',
+    backgroundColor: '#f9f9f9',
+  },
+  addButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  closeButton: {
+    marginTop: 10,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 15,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    marginTop: 10,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
